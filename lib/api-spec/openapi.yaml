@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: study
+    description: StudyMate AI study tools
 paths:
   /healthz:
     get:
@@ -24,6 +26,90 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /study/status:
+    get:
+      operationId: getStudyMateStatus
+      tags: [study]
+      summary: Check whether demo mode is active
+      responses:
+        "200":
+          description: Current assistant mode
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudyMateStatus"
+  /study/ask:
+    post:
+      operationId: askStudyMate
+      tags: [study]
+      summary: Ask a study question
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StudyQuestionInput"
+      responses:
+        "200":
+          description: Assistant answer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudyResult"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /study/notes:
+    post:
+      operationId: generateStudyNotes
+      tags: [study]
+      summary: Generate concise revision notes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StudyNotesInput"
+      responses:
+        "200":
+          description: Revision notes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudyResult"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /study/planner:
+    post:
+      operationId: generateStudyPlan
+      tags: [study]
+      summary: Create a revision schedule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StudyPlanInput"
+      responses:
+        "200":
+          description: Revision schedule
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudyResult"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +119,56 @@ components:
           type: string
       required:
         - status
+    StudyMateStatus:
+      type: object
+      properties:
+        mode:
+          type: string
+          enum: [demo]
+        message:
+          type: string
+      required: [mode, message]
+    StudyResult:
+      type: object
+      properties:
+        answer:
+          type: string
+        mode:
+          type: string
+          enum: [demo]
+      required: [answer, mode]
+    StudyQuestionInput:
+      type: object
+      properties:
+        question:
+          type: string
+          minLength: 2
+          maxLength: 2000
+      required: [question]
+    StudyNotesInput:
+      type: object
+      properties:
+        topic:
+          type: string
+          minLength: 2
+          maxLength: 160
+      required: [topic]
+    StudyPlanInput:
+      type: object
+      properties:
+        subjects:
+          type: string
+          minLength: 2
+          maxLength: 500
+        availableMinutes:
+          type: integer
+          minimum: 15
+          maximum: 720
+      required: [subjects, availableMinutes]
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
 
